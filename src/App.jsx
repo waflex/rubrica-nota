@@ -76,12 +76,15 @@ export default function App() {
       prev.map((a) =>
         a.id === alumnoId
           ? { ...a, puntajes: { ...a.puntajes, [criterioId]: valor } }
-          : a
-      )
+          : a,
+      ),
     );
 
   const agregarCriterio = () =>
-    setCriterios((prev) => [...prev, newCriterio(`Criterio ${prev.length + 1}`, 10)]);
+    setCriterios((prev) => [
+      ...prev,
+      newCriterio(`Criterio ${prev.length + 1}`, 10),
+    ]);
 
   const eliminarCriterio = (id) => {
     setCriterios((prev) => prev.filter((c) => c.id !== id));
@@ -89,7 +92,7 @@ export default function App() {
       prev.map((a) => {
         const { [id]: _, ...rest } = a.puntajes;
         return { ...a, puntajes: rest };
-      })
+      }),
     );
   };
 
@@ -98,8 +101,8 @@ export default function App() {
       prev.map((c) =>
         c.id === id
           ? { ...c, [campo]: campo === "puntajeMax" ? Number(valor) : valor }
-          : c
-      )
+          : c,
+      ),
     );
 
   const stats = alumnos.map((a) => {
@@ -117,11 +120,14 @@ export default function App() {
   return (
     <div className="min-h-screen bg-gray-50 p-6">
       <div className="max-w-6xl mx-auto space-y-5">
-
         {/* Header */}
         <div>
-          <h1 className="text-2xl font-semibold text-gray-800">Escala de Notas y Rúbricas</h1>
-          <p className="text-sm text-gray-500 mt-1">Sistema de evaluación con escala chilena</p>
+          <h1 className="text-2xl font-semibold text-gray-800">
+            Escala de Notas y Rúbricas
+          </h1>
+          <p className="text-sm text-gray-500 mt-1">
+            Sistema de evaluación con escala chilena
+          </p>
         </div>
 
         {/* Configuración */}
@@ -131,13 +137,39 @@ export default function App() {
           </p>
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
             {[
-              { label: "Nota mínima", key: "nMin", step: "0.1", min: 1, max: 6 },
-              { label: "Nota máxima", key: "nMax", step: "0.1", min: 2, max: 10 },
-              { label: "Nota de aprobación", key: "nApr", step: "0.1", min: 1, max: 10 },
-              { label: "Exigencia (%)", key: "exigencia", step: "1", min: 1, max: 100 },
+              {
+                label: "Nota mínima",
+                key: "nMin",
+                step: "0.1",
+                min: 1,
+                max: 6,
+              },
+              {
+                label: "Nota máxima",
+                key: "nMax",
+                step: "0.1",
+                min: 2,
+                max: 10,
+              },
+              {
+                label: "Nota de aprobación",
+                key: "nApr",
+                step: "0.1",
+                min: 1,
+                max: 10,
+              },
+              {
+                label: "Exigencia (%)",
+                key: "exigencia",
+                step: "1",
+                min: 1,
+                max: 100,
+              },
             ].map(({ label, key, step, min, max }) => (
               <div key={key}>
-                <label className="block text-xs text-gray-500 mb-1">{label}</label>
+                <label className="block text-xs text-gray-500 mb-1">
+                  {label}
+                </label>
                 <input
                   type="number"
                   step={step}
@@ -160,7 +192,10 @@ export default function App() {
             { label: "Promedio curso", value: promedio },
             { label: "Aprobados", value: `${aprobados} / ${alumnos.length}` },
           ].map(({ label, value }) => (
-            <div key={label} className="bg-white rounded-xl border border-gray-200 p-4">
+            <div
+              key={label}
+              className="bg-white rounded-xl border border-gray-200 p-4"
+            >
               <p className="text-xs text-gray-400 mb-1">{label}</p>
               <p className="text-2xl font-semibold text-gray-800">{value}</p>
             </div>
@@ -176,12 +211,17 @@ export default function App() {
                   Alumno
                 </th>
                 {criterios.map((c) => (
-                  <th key={c.id} className="px-3 py-3 text-center text-xs font-semibold text-gray-400 uppercase tracking-wider min-w-[120px]">
+                  <th
+                    key={c.id}
+                    className="px-3 py-3 text-center text-xs font-semibold text-gray-400 uppercase tracking-wider min-w-[120px]"
+                  >
                     {editandoCriterio === c.id ? (
                       <div className="flex flex-col gap-1.5">
                         <input
                           value={c.nombre}
-                          onChange={(e) => actualizarCriterio(c.id, "nombre", e.target.value)}
+                          onChange={(e) =>
+                            actualizarCriterio(c.id, "nombre", e.target.value)
+                          }
                           className="border border-gray-200 rounded-md px-2 py-1 text-xs text-center text-gray-700 focus:outline-none focus:ring-1 focus:ring-blue-400"
                         />
                         <div className="flex items-center justify-center gap-1">
@@ -189,14 +229,22 @@ export default function App() {
                             type="number"
                             value={c.puntajeMax}
                             min={1}
-                            onChange={(e) => actualizarCriterio(c.id, "puntajeMax", e.target.value)}
+                            onChange={(e) =>
+                              actualizarCriterio(
+                                c.id,
+                                "puntajeMax",
+                                e.target.value,
+                              )
+                            }
                             className="w-14 border border-gray-200 rounded-md px-1 py-1 text-xs text-center text-gray-700 focus:outline-none focus:ring-1 focus:ring-blue-400"
                           />
                           <span className="text-xs text-gray-400">pts</span>
                           <button
                             onClick={() => setEditandoCriterio(null)}
                             className="bg-green-100 text-green-700 text-xs px-2 py-1 rounded-md hover:bg-green-200 transition-colors"
-                          >✓</button>
+                          >
+                            ✓
+                          </button>
                         </div>
                       </div>
                     ) : (
@@ -212,7 +260,9 @@ export default function App() {
                           <button
                             onClick={() => eliminarCriterio(c.id)}
                             className="text-gray-300 hover:text-red-400 transition-colors text-xs leading-none"
-                          >✕</button>
+                          >
+                            ✕
+                          </button>
                         </div>
                         <div className="text-[11px] text-gray-300 font-normal normal-case mt-0.5">
                           máx {c.puntajeMax}
@@ -236,7 +286,9 @@ export default function App() {
                   key={alumno.id}
                   className={`border-b border-gray-50 ${idx % 2 === 1 ? "bg-gray-50/50" : ""} hover:bg-blue-50/30 transition-colors`}
                 >
-                  <td className={`px-5 py-2.5 font-medium text-gray-700 sticky left-0 ${idx % 2 === 1 ? "bg-gray-50" : "bg-white"}`}>
+                  <td
+                    className={`px-5 py-2.5 font-medium text-gray-700 sticky left-0 ${idx % 2 === 1 ? "bg-gray-50" : "bg-white"}`}
+                  >
                     {alumno.nombre}
                   </td>
                   {criterios.map((c) => (
@@ -247,7 +299,9 @@ export default function App() {
                         max={c.puntajeMax}
                         step="0.5"
                         value={alumno.puntajes[c.id] ?? ""}
-                        onChange={(e) => actualizarPuntaje(alumno.id, c.id, e.target.value)}
+                        onChange={(e) =>
+                          actualizarPuntaje(alumno.id, c.id, e.target.value)
+                        }
                         placeholder="—"
                         className="w-20 border border-gray-200 rounded-lg px-2 py-1.5 text-center text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-400 focus:border-transparent"
                       />
@@ -257,11 +311,13 @@ export default function App() {
                     {alumno.puntajeTotal} / {pMaxTotal}
                   </td>
                   <td className="px-5 py-2 text-center">
-                    <span className={`inline-block px-3 py-1 rounded-lg font-semibold text-base min-w-[48px] ${
-                      alumno.nota >= scale.nApr
-                        ? "bg-green-100 text-green-700"
-                        : "bg-red-100 text-red-600"
-                    }`}>
+                    <span
+                      className={`inline-block px-3 py-1 rounded-lg font-semibold text-base min-w-[48px] ${
+                        alumno.nota >= scale.nApr
+                          ? "bg-green-100 text-green-700"
+                          : "bg-red-100 text-red-600"
+                      }`}
+                    >
                       {alumno.nota.toFixed(1)}
                     </span>
                   </td>
@@ -269,7 +325,9 @@ export default function App() {
                     <button
                       onClick={() => eliminarAlumno(alumno.id)}
                       className="text-gray-300 hover:text-red-400 transition-colors text-sm"
-                    >✕</button>
+                    >
+                      ✕
+                    </button>
                   </td>
                 </tr>
               ))}
@@ -313,12 +371,21 @@ export default function App() {
 
         {/* Fórmula */}
         <div className="bg-gray-100 rounded-xl px-5 py-4 text-xs text-gray-400 leading-relaxed">
-          <span className="font-semibold text-gray-500">Fórmula aplicada: </span>
-          Si puntaje &lt; {scale.exigencia}% del máximo → nota = ({scale.nApr}−{scale.nMin}) × p / (e × pMax) + {scale.nMin}.{" "}
-          Si puntaje ≥ umbral → nota = ({scale.nMax}−{scale.nApr}) × (p − umbral) / (pMax × (1−e)) + {scale.nApr}.{" "}
-          Resultado truncado a 2 decimales y aproximado al décimo (≥5 sube).
+          <span className="font-semibold text-gray-500">
+            Fórmula aplicada:{" "}
+          </span>
+          Si puntaje &lt; {scale.exigencia}% del máximo → nota = ({scale.nApr}−
+          {scale.nMin}) × p / (e × pMax) + {scale.nMin}. Si puntaje ≥ umbral →
+          nota = ({scale.nMax}−{scale.nApr}) × (p − umbral) / (pMax × (1−e)) +{" "}
+          {scale.nApr}. Resultado truncado a 2 decimales y aproximado al décimo
+          (≥5 sube).
         </div>
 
+        {/* Footer */}
+        <div className="text-center text-xs text-gray-400 mt-8">
+          Desarrollado por{" "}
+          <span className="font-semibold text-gray-500">JRTDEV</span>
+        </div>
       </div>
     </div>
   );
