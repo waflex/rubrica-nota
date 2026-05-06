@@ -2,7 +2,7 @@
 import { useState, useCallback } from "react";
 import { useAuth } from "./hooks/useAuth";
 import { useEvaluations } from "./hooks/useEvaluations";
-import LoginScreen from "./components/auth/LoginScreen";
+import { useLocalStorage } from "./hooks/useLocalStorage";
 import Header from "./components/layout/Header";
 import Sidebar from "./components/layout/Sidebar";
 import EvaluationForm from "./components/evaluation/EvaluationForm";
@@ -12,7 +12,6 @@ import {
 } from "./components/import/ImportModals";
 import { localId } from "./utils/constants";
 import { calcularEstadisticas } from "./utils/calculations";
-
 //Hero Icons
 import {
   PencilSquareIcon,
@@ -29,7 +28,7 @@ export default function App() {
   // Autenticación
   const {
     user,
-    authLoading,
+    loginLoading,
     handleLogin,
     handleLogout,
   } = useAuth();
@@ -44,11 +43,10 @@ export default function App() {
     updateEvalData,
     crearEvaluacion,
     eliminarEvaluacion,
-    resetEvaltions,
   } = useEvaluations(user);
 
-  // Estado local de UI
-  const [sidebarOpen, setSidebarOpen] = useState(true);
+  // Estado local de UI - sidebar persiste en localStorage
+  const [sidebarOpen, setSidebarOpen] = useLocalStorage("rubrica_sidebar_open", true);
   const [modalImportAlumnos, setModalImportAlumnos] = useState(false);
   const [modalImportRubrica, setModalImportRubrica] = useState(false);
 
@@ -189,47 +187,7 @@ export default function App() {
     [updateEvalData],
   );
 
-  // Manejador de escala
-  const handleScaleChange = useCallback(
-    (key, value) => {
-      updateEvalData((prev) => ({
-        ...prev,
-        escala: { ...prev.escala, [key]: parseFloat(value) || 0 },
-      }));
-    },
-    [updateEvalData],
-  );
-
-  // Estado de carga inicial
-  if (authLoading) {
-    return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="text-center space-y-4">
-          {/* Spinner */}
-          <div className="flex justify-center">
-            <div className="w-10 h-10 border-4 border-gray-200 border-t-blue-600 rounded-full animate-spin"></div>
-          </div>
-
-          <p className="text-gray-400 text-sm animate-pulse">
-            Cargando aplicación…
-          </p>
-        </div>
-      </div>
-    );
-  }
-
-  // Pantalla de login
-  // if (!user) {
-  //   return (
-  //     <LoginScreen
-  //       onLogin={handleLogin}
-  //       onContinueWithoutLogin={handleContinueWithoutLogin}
-  //       loading={loginLoading}
-  //     />
-  //   );
-  // }
-
-  // Aplicación principal
+  // ✅ Aplicación principal - SIN pantalla de carga ni login
   return (
     <div className="min-h-screen bg-gray-50 flex">
       {/* Sidebar */}
@@ -254,6 +212,7 @@ export default function App() {
           onImportRubrica={() => setModalImportRubrica(true)}
           onLogin={handleLogin}
           onLogout={handleLogout}
+          loginLoading={loginLoading}
           evalNombre={evalData.nombre}
           onEvalNombreChange={handleEvalNombreChange}
           hasActiveEval={!!evalActivaId}

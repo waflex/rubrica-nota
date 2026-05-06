@@ -1,45 +1,30 @@
-import {
-  ArrowRightEndOnRectangleIcon,
-  Bars3Icon,
-  DocumentPlusIcon,
-  InboxArrowDownIcon,
-  LockClosedIcon,
-  UserPlusIcon,
-} from "@heroicons/react/24/outline";
+// src/components/layout/Header.jsx
 import { useState } from "react";
+import {
+  ArrowRightOnRectangleIcon,
+  UserIcon,
+  CloudArrowUpIcon,
+  LockClosedIcon,
+} from "@heroicons/react/24/outline";
 
-/**
- * Header de la aplicación
- * @param {Object} user - Usuario actual
- * @param {boolean} saving - Indica si está guardando
- * @param {Function} onToggleSidebar - Función para mostrar/ocultar sidebar
- * @param {Function} onImportAlumnos - Abrir modal de importación de alumnos
- * @param {Function} onImportRubrica - Abrir modal de importación de rúbrica
- * @param {Function} onLogout - Cerrar sesión
- * @param {string} evalNombre - Nombre de la evaluación activa
- * @param {Function} onEvalNombreChange - Cambiar nombre de evaluación
- * @param {boolean} hasActiveEval - Si hay una evaluación activa
- * @param {Function} onCreateEval - Crear nueva evaluación
- */
 export default function Header({
   user,
   saving,
   onToggleSidebar,
   onImportAlumnos,
   onImportRubrica,
+  onLogin,
   onLogout,
+  loginLoading,
   evalNombre,
   onEvalNombreChange,
   hasActiveEval,
   onCreateEval,
-  onLogin
 }) {
   const [showUserMenu, setShowUserMenu] = useState(false);
   const [showImportMenu, setShowImportMenu] = useState(false);
 
-  // Cerrar menús al hacer clic fuera
   const handleBlur = (setter) => {
-    // Pequeño delay para permitir el clic en el menú
     setTimeout(() => setter(false), 200);
   };
 
@@ -54,7 +39,7 @@ export default function Header({
           aria-label="Mostrar/ocultar menú lateral"
           title="Menú lateral"
         >
-          <Bars3Icon className="size-5" />
+          ☰
         </button>
 
         {/* Título / Nombre de evaluación */}
@@ -89,7 +74,7 @@ export default function Header({
               ) : (
                 <span className="text-xs text-green-500 flex items-center gap-1">
                   <span className="w-1.5 h-1.5 bg-green-400 rounded-full"></span>
-                  Guardado
+                  {user?.isAnonymous ? "Local" : "Guardado"}
                 </span>
               )}
             </div>
@@ -106,7 +91,7 @@ export default function Header({
                 aria-haspopup="true"
                 aria-expanded={showImportMenu}
               >
-                <InboxArrowDownIcon className="size-5 mx-2" /> Importar
+                📥 Importar
                 <span className="text-gray-400">▼</span>
               </button>
 
@@ -123,9 +108,7 @@ export default function Header({
                     className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 
                       transition-colors cursor-pointer flex items-center gap-2"
                   >
-                    <span>
-                      <UserPlusIcon className="size-5 mx-2" />
-                    </span>
+                    <span>📋</span>
                     Importar alumnos
                   </button>
                   <button
@@ -136,9 +119,7 @@ export default function Header({
                     className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 
                       transition-colors cursor-pointer flex items-center gap-2"
                   >
-                    <span>
-                      <InboxArrowDownIcon className="size-5 mx-2" />
-                    </span>
+                    <span>📊</span>
                     Importar rúbrica
                   </button>
                 </div>
@@ -146,30 +127,22 @@ export default function Header({
             </div>
           )}
 
-          {/* Nueva evaluación (solo cuando no hay activa) */}
-
-          {!hasActiveEval && (
-            <button
-              onClick={onCreateEval}
-              className="flex items-center gap-1.5 bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium px-4 py-1.5
-    rounded-lg transition-colors cursor-pointer hidden sm:flex"
-            >
-              <DocumentPlusIcon className="size-5" />
-              <span>Nueva</span>
-            </button>
-          )}
-          {!user && (
+          {/* ✅ Botón de Login / Usuario */}
+          {user?.isAnonymous ? (
             <button
               onClick={onLogin}
+              disabled={loginLoading}
               className="flex items-center gap-1.5 bg-gray-900 hover:bg-gray-800 text-white text-sm font-medium px-4 py-1.5
       rounded-lg transition-colors cursor-pointer hidden sm:flex"
             >
-              <LockClosedIcon className="size-5" />
-              <span>Iniciar sesión</span>
+              {loginLoading ? (
+                <span className="w-3.5 h-3.5 border-2 border-white border-t-transparent rounded-full animate-spin"></span>
+              ) : (
+                <LockClosedIcon className="size-3.5" />
+              )}
+              <span className="hidden sm:inline">Iniciar sesión</span>
             </button>
-          )}
-          {/* Menú de usuario */}
-          {user && (
+          ) : (
             <div className="relative">
               <button
                 onClick={() => setShowUserMenu(!showUserMenu)}
@@ -179,15 +152,15 @@ export default function Header({
                 aria-haspopup="true"
                 aria-expanded={showUserMenu}
               >
-                {user.photoURL ? (
+                {user?.photoURL ? (
                   <img
                     src={user.photoURL}
                     alt={user.displayName || "Usuario"}
                     className="w-7 h-7 rounded-full border border-gray-200"
                   />
                 ) : (
-                  <div className="w-7 h-7 rounded-full bg-gray-200 flex items-center justify-center text-xs text-gray-500">
-                    {(user.displayName || user.email || "U")[0].toUpperCase()}
+                  <div className="w-7 h-7 rounded-full bg-blue-100 text-blue-600 flex items-center justify-center">
+                    <UserIcon className="size-4" />
                   </div>
                 )}
               </button>
@@ -197,54 +170,27 @@ export default function Header({
                   className="absolute right-0 top-full mt-1 bg-white border border-gray-200 rounded-lg 
                   shadow-lg py-1 z-50 min-w-[200px]"
                 >
-                  {/* Info del usuario */}
                   <div className="px-4 py-2 border-b border-gray-100">
                     <p className="text-sm font-medium text-gray-800 truncate">
                       {user.displayName || "Usuario"}
                     </p>
-                    <p className="text-xs text-gray-400 truncate">
-                      {user.email}
+                    <p className="text-xs text-gray-400 truncate flex items-center gap-1">
+                      <CloudArrowUpIcon className="size-3" />
+                      {user.email || "Sincronizado en la nube"}
                     </p>
-                    {user.isAnonymous && (
-                      <span
-                        className="inline-block mt-1 text-[10px] bg-yellow-100 text-yellow-700 
-                        px-1.5 py-0.5 rounded-full"
-                      >
-                        Modo local
-                      </span>
-                    )}
                   </div>
 
-                  {/* Acciones */}
-                  {user.isAnonymous ? (
-                    <button
-                      onClick={() => {
-                        setShowUserMenu(false);
-                        onLogout();
-                      }}
-                      className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 
-                        transition-colors cursor-pointer flex items-center gap-2"
-                    >
-                      <span>
-                        <LockClosedIcon className="size-5" />
-                      </span>
-                      Iniciar sesión para guardar
-                    </button>
-                  ) : (
-                    <button
-                      onClick={() => {
-                        setShowUserMenu(false);
-                        onLogout();
-                      }}
-                      className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-red-50 
-                        hover:text-red-600 transition-colors cursor-pointer flex items-center gap-2"
-                    >
-                      <span>
-                        <ArrowRightEndOnRectangleIcon className="size-5" />
-                      </span>
-                      Cerrar sesión
-                    </button>
-                  )}
+                  <button
+                    onClick={() => {
+                      setShowUserMenu(false);
+                      onLogout();
+                    }}
+                    className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-red-50 
+                      hover:text-red-600 transition-colors cursor-pointer flex items-center gap-2"
+                  >
+                    <ArrowRightOnRectangleIcon className="size-4" />
+                    Cerrar sesión
+                  </button>
                 </div>
               )}
             </div>

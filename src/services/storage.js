@@ -1,11 +1,11 @@
 // src/services/storage.js
-import { 
-  collection, 
-  doc, 
-  addDoc, 
-  updateDoc, 
-  deleteDoc, 
-  onSnapshot, 
+import {
+  collection,
+  doc,
+  addDoc,
+  updateDoc,
+  deleteDoc,
+  onSnapshot,
   serverTimestamp,
 } from "firebase/firestore";
 import { db } from "./firebase";
@@ -18,13 +18,14 @@ const COLLECTION_NAME = "evaluaciones";
 class LocalStorage {
   constructor() {
     this.prefix = "rubrica_eval_";
+    this.listeners = new Set(); // ✅ Lista de callbacks suscritos
   }
 
   getAll() {
     try {
       const keys = Object.keys(localStorage)
         .filter(key => key.startsWith(this.prefix));
-      
+
       return keys
         .map(key => {
           const item = JSON.parse(localStorage.getItem(key));
@@ -46,6 +47,7 @@ class LocalStorage {
         updatedAt: Date.now(),
       };
       localStorage.setItem(this.prefix + id, JSON.stringify(item));
+      this.notifyListeners(); // ✅ Notificar cambios
       return id;
     } catch (error) {
       console.error("Error al guardar en localStorage:", error);
@@ -57,16 +59,17 @@ class LocalStorage {
     try {
       const key = this.prefix + id;
       const existing = JSON.parse(localStorage.getItem(key));
-      
+
       if (!existing) throw new Error("Evaluación no encontrada");
-      
+
       const updated = {
         ...existing,
         ...data,
         updatedAt: Date.now(),
       };
-      
+
       localStorage.setItem(key, JSON.stringify(updated));
+      this.notifyListeners(); // ✅ Notificar cambios
     } catch (error) {
       console.error("Error al actualizar en localStorage:", error);
       throw error;
@@ -76,20 +79,43 @@ class LocalStorage {
   async delete(id) {
     try {
       localStorage.removeItem(this.prefix + id);
+      this.notifyListeners(); // ✅ Notificar cambios
     } catch (error) {
       console.error("Error al eliminar de localStorage:", error);
       throw error;
     }
   }
 
+  // ✅ Suscribirse a cambios (para uso en useEvaluations)
   subscribe(callback) {
-    // En localStorage no hay sincronización en tiempo real,
-    // pero podemos simular con eventos de storage
-    const handler = () => callback(this.getAll());
-    window.addEventListener("storage", handler);
+    this.listeners.add(callback);
+
+    // Llamar inmediatamente con los datos actuales
     callback(this.getAll());
-    
-    return () => window.removeEventListener("storage", handler);
+
+    // Escuchar cambios en otras pestañas
+    const storageHandler = () => {
+      callback(this.getAll());
+    };
+    window.addEventListener("storage", storageHandler);
+
+    // Devolver función para cancelar suscripción
+    return () => {
+      this.listeners.delete(callback);
+      window.removeEventListener("storage", storageHandler);
+    };
+  }
+
+  // ✅ Notificar a todos los suscriptores
+  notifyListeners() {
+    const data = this.getAll();
+    this.listeners.forEach(callback => {
+      try {
+        callback(data);
+      } catch (error) {
+        console.error("Error en listener de LocalStorage:", error);
+      }
+    });
   }
 }
 
@@ -126,7 +152,7 @@ class FirebaseStorage {
 
   subscribe(callback) {
     const q = collection(db, "users", this.uid, COLLECTION_NAME);
-    
+
     return onSnapshot(q, (snapshot) => {
       const evaluations = snapshot.docs
         .map((doc) => ({
@@ -134,7 +160,7 @@ class FirebaseStorage {
           ...doc.data(),
         }))
         .sort((a, b) => (b.updatedAt?.seconds ?? 0) - (a.updatedAt?.seconds ?? 0));
-      
+
       callback(evaluations);
     }, (error) => {
       console.error("Error en suscripción Firebase:", error);
@@ -150,7 +176,7 @@ export function getStorageService(user) {
   if (user?.isAnonymous || !db) {
     return new LocalStorage();
   }
-  
+
   return new FirebaseStorage(user.uid);
 }
 
