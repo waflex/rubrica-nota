@@ -8,7 +8,7 @@ export function useEvaluations(user) {
   const [evalActivaId, setEvalActivaId] = useState(null);
   const [evalData, setEvalData] = useState(EMPTY_EVAL);
   const [saving, setSaving] = useState(false);
-  
+
   const storageRef = useRef(null);
   const saveTimer = useRef(null);
   const evalDataRef = useRef(evalData);
@@ -30,11 +30,11 @@ export function useEvaluations(user) {
 
     // Crear servicio de storage
     storageRef.current = getStorageService(user);
-    
+
     // Suscribirse a cambios
     const unsubscribe = storageRef.current.subscribe((newEvaluaciones) => {
       setEvaluaciones(newEvaluaciones);
-      
+
       // Verificar si la evaluación activa aún existe
       setEvalActivaId((prevId) => {
         if (prevId && !newEvaluaciones.find(e => e.id === prevId)) {
@@ -45,7 +45,7 @@ export function useEvaluations(user) {
         return prevId;
       });
     });
-    
+
     // Cleanup
     return () => {
       if (unsubscribe) unsubscribe();
@@ -57,11 +57,11 @@ export function useEvaluations(user) {
   // Cambiar evaluación activa
   const seleccionarEval = useCallback((id) => {
     setEvalActivaId(id);
-    
+
     // Buscar en el estado actual de evaluaciones
     setEvaluaciones((prev) => {
       const evaluacion = prev.find((e) => e.id === id);
-      
+
       if (evaluacion) {
         setEvalData({
           nombre: evaluacion.nombre ?? "",
@@ -72,7 +72,7 @@ export function useEvaluations(user) {
       } else {
         setEvalData(EMPTY_EVAL);
       }
-      
+
       return prev;
     });
   }, []);
@@ -80,7 +80,7 @@ export function useEvaluations(user) {
   // Guardar evaluación con debounce
   const saveEval = useCallback(async (id, data) => {
     if (!userRef.current || !id || !storageRef.current) return;
-    
+
     setSaving(true);
     try {
       await storageRef.current.update(id, {
@@ -102,7 +102,7 @@ export function useEvaluations(user) {
       const next = typeof updater === "function" ? updater(prev) : updater;
       return next;
     });
-    
+
     // Debounce del guardado (se ejecuta después del render)
     clearTimeout(saveTimer.current);
     saveTimer.current = setTimeout(() => {
@@ -123,7 +123,7 @@ export function useEvaluations(user) {
   // CRUD de evaluaciones
   const crearEvaluacion = useCallback(async (nombre) => {
     if (!userRef.current || !storageRef.current) return null;
-    
+
     const evalName = nombre?.trim() || "Nueva evaluación";
     const id = await storageRef.current.create({
       nombre: evalName,
@@ -131,24 +131,29 @@ export function useEvaluations(user) {
       criterios: EMPTY_EVAL.criterios,
       alumnos: [],
     });
-    
+
     return id;
   }, []);
 
   const eliminarEvaluacion = useCallback(async (id) => {
     if (!storageRef.current) return;
-    
+
     await storageRef.current.delete(id);
-    
+
     // La limpieza del estado activo se maneja en el callback de suscripción
   }, []);
 
   // Limpiar el timer al desmontar
   useEffect(() => {
-    return () => {
-      clearTimeout(saveTimer.current);
-    };
-  }, []);
+    if (!user) {
+      setTimeout(() => {
+        setEvaluaciones([]);
+        setEvalActivaId(null);
+        setEvalData(EMPTY_EVAL);
+        storageRef.current = null;
+      }, 0);
+    }
+  }, [user]);
 
   return {
     evaluaciones,

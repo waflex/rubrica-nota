@@ -1,4 +1,10 @@
-// src/components/layout/Sidebar.jsx
+import {
+  CircleStackIcon,
+  CloudIcon,
+  DocumentPlusIcon,
+  Square2StackIcon,
+  TrashIcon,
+} from "@heroicons/react/24/outline";
 import { useState } from "react";
 
 /**
@@ -32,9 +38,10 @@ export default function Sidebar({
 
   const handleDelete = async (id, nombre) => {
     if (deletingId === id) return; // Evitar doble clic
-    
-    if (!confirm(`¿Eliminar "${nombre}"?\n\nEsta acción no se puede deshacer.`)) return;
-    
+
+    if (!confirm(`¿Eliminar "${nombre}"?\n\nEsta acción no se puede deshacer.`))
+      return;
+
     setDeletingId(id);
     try {
       await onDelete(id);
@@ -55,7 +62,9 @@ export default function Sidebar({
       <div className="p-4 border-b border-gray-100">
         <div className="flex items-center justify-between mb-3">
           <div className="flex items-center gap-2">
-            <span className="text-xl">📝</span>
+            <span className="text-xl">
+              <Square2StackIcon className="size-5 mx-2" />
+            </span>
             <span className="text-sm font-semibold text-gray-800">
               Mis Rúbricas
             </span>
@@ -93,7 +102,7 @@ export default function Sidebar({
           className="w-full bg-blue-600 hover:bg-blue-700 text-white text-xs font-medium py-2 
             rounded-lg transition-colors cursor-pointer flex items-center justify-center gap-1.5"
         >
-          <span className="text-lg leading-none">+</span>
+          <DocumentPlusIcon className="size-5 mx-2" />
           Nueva evaluación
         </button>
       </div>
@@ -104,7 +113,9 @@ export default function Sidebar({
           <p className="text-[11px] font-semibold text-gray-400 uppercase tracking-widest px-1 mb-2">
             Evaluaciones
             {evaluaciones.length > 0 && (
-              <span className="ml-1 text-gray-300">({evaluaciones.length})</span>
+              <span className="ml-1 text-gray-300">
+                ({evaluaciones.length})
+              </span>
             )}
           </p>
 
@@ -124,9 +135,10 @@ export default function Sidebar({
                   className={`
                     group flex items-center justify-between rounded-lg px-3 py-2 cursor-pointer 
                     transition-all duration-150
-                    ${evalActivaId === eva.id
-                      ? "bg-blue-50 text-blue-700 shadow-sm"
-                      : "hover:bg-gray-50 text-gray-700"
+                    ${
+                      evalActivaId === eva.id
+                        ? "bg-blue-50 text-blue-700 shadow-sm"
+                        : "hover:bg-gray-50 text-gray-700"
                     }
                     ${deletingId === eva.id ? "opacity-50 pointer-events-none" : ""}
                   `}
@@ -144,8 +156,8 @@ export default function Sidebar({
                       {eva.nombre || "Sin nombre"}
                     </p>
                     <p className="text-[10px] text-gray-400 truncate mt-0.5">
-                      {(eva.alumnos?.length || 0)} alumnos ·{" "}
-                      {(eva.criterios?.length || 0)} criterios
+                      {eva.alumnos?.length || 0} alumnos ·{" "}
+                      {eva.criterios?.length || 0} criterios
                     </p>
                   </div>
 
@@ -164,7 +176,11 @@ export default function Sidebar({
                     aria-label={`Eliminar ${eva.nombre}`}
                     title="Eliminar evaluación"
                   >
-                    {deletingId === eva.id ? "⏳" : "✕"}
+                    {deletingId === eva.id ? (
+                      <div className="w-4 h-4 border-2 border-gray-300 border-t-red-500 rounded-full animate-spin" />
+                    ) : (
+                      <TrashIcon className="size-4" />
+                    )}
                   </button>
                 </div>
               ))
@@ -177,9 +193,15 @@ export default function Sidebar({
       <div className="p-3 border-t border-gray-100">
         <div className="text-[10px] text-gray-400 text-center">
           {user?.isAnonymous ? (
-            <p>💾 Datos guardados localmente</p>
+            <p className="flex items-center gap-1.5">
+              <CircleStackIcon className="size-4 text-gray-500" />
+              Datos guardados localmente
+            </p>
           ) : (
-            <p>☁️ Datos sincronizados en la nube</p>
+            <p className="flex items-center gap-1.5">
+              <CloudIcon className="size-4 text-blue-500" />
+              Datos sincronizados en la nube
+            </p>
           )}
         </div>
       </div>
@@ -193,7 +215,7 @@ export default function Sidebar({
                 Nueva evaluación
               </h3>
             </div>
-            
+
             <div className="px-6 py-5 space-y-4">
               <div>
                 <label className="block text-xs text-gray-500 mb-1 font-medium">

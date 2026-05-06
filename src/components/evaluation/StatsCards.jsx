@@ -1,8 +1,10 @@
-// src/components/evaluation/StatsCards.jsx
+import {
+  DocumentPlusIcon,
+  UserGroupIcon,
+  ChartBarIcon,
+  CheckCircleIcon,
+} from "@heroicons/react/24/outline";
 
-/**
- * Tarjeta de estadística individual
- */
 function StatCard({ label, value, icon, color = "blue" }) {
   const colorClasses = {
     blue: "bg-blue-50 text-blue-700",
@@ -16,7 +18,9 @@ function StatCard({ label, value, icon, color = "blue" }) {
       <div className="flex items-start justify-between">
         <div>
           <p className="text-xs text-gray-400 mb-1 font-medium">{label}</p>
-          <p className="text-2xl font-semibold text-gray-800 tabular-nums">{value}</p>
+          <p className="text-2xl font-semibold text-gray-800 tabular-nums">
+            {value}
+          </p>
         </div>
         {icon && (
           <span className={`text-lg ${colorClasses[color]} p-2 rounded-lg`}>
@@ -32,41 +36,43 @@ function StatCard({ label, value, icon, color = "blue" }) {
  * Componente que muestra estadísticas de la evaluación
  * @param {Object} stats - Datos estadísticos
  */
-export default function StatsCards({ 
-  pMaxTotal, 
-  totalAlumnos, 
-  promedio, 
+export default function StatsCards({
+  pMaxTotal,
+  totalAlumnos,
+  promedio,
   aprobados,
-  escala 
+  escala,
 }) {
-  const porcentajeAprobacion = totalAlumnos > 0 
-    ? ((aprobados / totalAlumnos) * 100).toFixed(0)
-    : 0;
+  const porcentajeAprobacion =
+    totalAlumnos > 0 ? ((aprobados / totalAlumnos) * 100).toFixed(0) : 0;
 
   return (
     <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
       <StatCard
         label="Puntaje total"
         value={`${pMaxTotal} pts`}
-        icon="📊"
+        icon={<DocumentPlusIcon className="size-5" />}
         color="blue"
       />
+
       <StatCard
         label="Alumnos"
         value={totalAlumnos}
-        icon="👥"
+        icon={<UserGroupIcon className="size-5" />}
         color="purple"
       />
+
       <StatCard
         label="Promedio curso"
         value={promedio}
-        icon="📈"
+        icon={<ChartBarIcon className="size-5" />}
         color={Number(promedio) >= escala.nApr ? "green" : "yellow"}
       />
+
       <StatCard
         label="Aprobados"
         value={`${aprobados} / ${totalAlumnos}`}
-        icon="✅"
+        icon={<CheckCircleIcon className="size-5" />}
         color={porcentajeAprobacion >= 60 ? "green" : "yellow"}
       />
     </div>

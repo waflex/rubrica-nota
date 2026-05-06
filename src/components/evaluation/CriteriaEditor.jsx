@@ -1,4 +1,5 @@
 // src/components/evaluation/CriteriaEditor.jsx
+import { PencilSquareIcon, TrashIcon } from "@heroicons/react/24/outline";
 import { useState } from "react";
 
 /**
@@ -9,12 +10,12 @@ import { useState } from "react";
  * @param {Function} onDelete - Callback para eliminar criterio
  * @param {number} pMaxTotal - Puntaje máximo total
  */
-export default function CriteriaEditor({ 
-  criterios, 
-  onAdd, 
-  onUpdate, 
-  onDelete, 
-  pMaxTotal 
+export default function CriteriaEditor({
+  criterios,
+  onAdd,
+  onUpdate,
+  onDelete,
+  pMaxTotal,
 }) {
   const [editandoId, setEditandoId] = useState(null);
 
@@ -64,7 +65,9 @@ export default function CriteriaEditor({
                 <div className="flex items-start gap-2">
                   <input
                     value={criterio.nombre}
-                    onChange={(e) => onUpdate(criterio.id, "nombre", e.target.value)}
+                    onChange={(e) =>
+                      onUpdate(criterio.id, "nombre", e.target.value)
+                    }
                     placeholder="Nombre del criterio"
                     className="flex-1 border border-gray-200 rounded-md px-3 py-1.5 text-sm text-gray-700 
                       focus:outline-none focus:ring-2 focus:ring-blue-400 focus:border-transparent"
@@ -74,7 +77,9 @@ export default function CriteriaEditor({
                     <input
                       type="number"
                       value={criterio.puntajeMax}
-                      onChange={(e) => onUpdate(criterio.id, "puntajeMax", e.target.value)}
+                      onChange={(e) =>
+                        onUpdate(criterio.id, "puntajeMax", e.target.value)
+                      }
                       min={1}
                       className="w-20 border border-gray-200 rounded-md px-2 py-1.5 text-sm text-center text-gray-700 
                         focus:outline-none focus:ring-2 focus:ring-blue-400 focus:border-transparent"
@@ -104,34 +109,39 @@ export default function CriteriaEditor({
               </div>
             ) : (
               /* Modo vista */
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-3">
+              <div className="flex items-center justify-between group">
+                {/* Info */}
+                <div className="flex items-center gap-3 min-w-0">
                   <button
                     onClick={() => handleStartEdit(criterio.id)}
                     className="text-sm font-medium text-gray-700 hover:text-blue-600 
-                      transition-colors cursor-pointer text-left"
-                    title="Clic para editar"
+        transition-colors text-left truncate"
+                    title="Editar criterio"
                   >
                     {criterio.nombre}
                   </button>
-                  <span className="text-xs text-gray-400 bg-gray-100 px-2 py-0.5 rounded-full">
+
+                  <span className="text-xs text-gray-500 bg-gray-100 px-2 py-0.5 rounded-full whitespace-nowrap">
                     {criterio.puntajeMax} pts
                   </span>
                 </div>
-                <div className="flex items-center gap-1">
+
+                {/* Acciones */}
+                <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
                   <button
                     onClick={() => handleStartEdit(criterio.id)}
-                    className="text-gray-300 hover:text-blue-500 transition-colors p-1 cursor-pointer"
-                    title="Editar criterio"
+                    className="p-1.5 rounded-md text-gray-400 hover:text-blue-600 hover:bg-blue-50 transition-colors"
+                    title="Editar"
                   >
-                    ✎
+                    <PencilSquareIcon className="size-4" />
                   </button>
+
                   <button
                     onClick={() => onDelete(criterio.id)}
-                    className="text-gray-300 hover:text-red-400 transition-colors p-1 cursor-pointer"
-                    title="Eliminar criterio"
+                    className="p-1.5 rounded-md text-gray-400 hover:text-red-500 hover:bg-red-50 transition-colors"
+                    title="Eliminar"
                   >
-                    ✕
+                    <TrashIcon className="size-4" />
                   </button>
                 </div>
               </div>
