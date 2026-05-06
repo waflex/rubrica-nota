@@ -8,15 +8,21 @@ import {
 import { auth, provider } from "../services/firebase";
 
 export function useAuth() {
-  const [user, setUser] = useState(null);
-  const [authLoading, setAuthLoading] = useState(true);
+  const [user, setUser] = useState(() => {
+    // ✅ Iniciar como usuario anónimo por defecto
+    return { isAnonymous: true, uid: "local" };
+  });
+  const [authLoading, setAuthLoading] = useState(false); // ✅ Ya no carga, es inmediato
   const [loginLoading, setLoginLoading] = useState(false);
 
-  // Escuchar cambios de autenticación
+  // Escuchar cambios de autenticación de Firebase
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (firebaseUser) => {
-      setUser(firebaseUser);
-      setAuthLoading(false);
+      if (firebaseUser) {
+        // Usuario autenticado con Google
+        setUser(firebaseUser);
+      }
+      // Si no hay usuario de Firebase, mantenemos el anónimo
     });
     return () => unsubscribe();
   }, []);
@@ -26,6 +32,7 @@ export function useAuth() {
     setLoginLoading(true);
     try {
       await signInWithPopup(auth, provider);
+      // El onAuthStateChanged se encargará de actualizar el user
     } catch (error) {
       console.error("Error al iniciar sesión:", error);
       throw error;
@@ -34,31 +41,24 @@ export function useAuth() {
     }
   }, []);
 
-  // Continuar sin sesión
-  const handleContinueWithoutLogin = useCallback(() => {
-    setUser({ isAnonymous: true, uid: "local" });
-    setAuthLoading(false);
-  }, []);
-
   // Cerrar sesión
   const handleLogout = useCallback(async () => {
-    if (user?.isAnonymous) {
-      setUser(null);
-      return;
-    }
     try {
       await signOut(auth);
+      // Volver a modo anónimo
+      setUser({ isAnonymous: true, uid: "local" });
     } catch (error) {
       console.error("Error al cerrar sesión:", error);
+      // Si falla, igual volvemos a anónimo
+      setUser({ isAnonymous: true, uid: "local" });
     }
-  }, [user]);
+  }, []);
 
   return {
     user,
     authLoading,
     loginLoading,
     handleLogin,
-    handleContinueWithoutLogin,
     handleLogout,
   };
 }
