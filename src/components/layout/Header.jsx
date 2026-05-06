@@ -1,4 +1,11 @@
-// src/components/layout/Header.jsx
+import {
+  ArrowRightEndOnRectangleIcon,
+  Bars3Icon,
+  DocumentPlusIcon,
+  InboxArrowDownIcon,
+  LockClosedIcon,
+  UserPlusIcon,
+} from "@heroicons/react/24/outline";
 import { useState } from "react";
 
 /**
@@ -25,6 +32,7 @@ export default function Header({
   onEvalNombreChange,
   hasActiveEval,
   onCreateEval,
+  onLogin
 }) {
   const [showUserMenu, setShowUserMenu] = useState(false);
   const [showImportMenu, setShowImportMenu] = useState(false);
@@ -46,7 +54,7 @@ export default function Header({
           aria-label="Mostrar/ocultar menú lateral"
           title="Menú lateral"
         >
-          ☰
+          <Bars3Icon className="size-5" />
         </button>
 
         {/* Título / Nombre de evaluación */}
@@ -98,13 +106,15 @@ export default function Header({
                 aria-haspopup="true"
                 aria-expanded={showImportMenu}
               >
-                📥 Importar
+                <InboxArrowDownIcon className="size-5 mx-2" /> Importar
                 <span className="text-gray-400">▼</span>
               </button>
 
               {showImportMenu && (
-                <div className="absolute right-0 top-full mt-1 bg-white border border-gray-200 rounded-lg 
-                  shadow-lg py-1 z-50 min-w-[180px]">
+                <div
+                  className="absolute right-0 top-full mt-1 bg-white border border-gray-200 rounded-lg 
+                  shadow-lg py-1 z-50 min-w-[180px]"
+                >
                   <button
                     onClick={() => {
                       onImportAlumnos();
@@ -113,7 +123,9 @@ export default function Header({
                     className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 
                       transition-colors cursor-pointer flex items-center gap-2"
                   >
-                    <span>📋</span>
+                    <span>
+                      <UserPlusIcon className="size-5 mx-2" />
+                    </span>
                     Importar alumnos
                   </button>
                   <button
@@ -124,7 +136,9 @@ export default function Header({
                     className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 
                       transition-colors cursor-pointer flex items-center gap-2"
                   >
-                    <span>📊</span>
+                    <span>
+                      <InboxArrowDownIcon className="size-5 mx-2" />
+                    </span>
                     Importar rúbrica
                   </button>
                 </div>
@@ -133,16 +147,27 @@ export default function Header({
           )}
 
           {/* Nueva evaluación (solo cuando no hay activa) */}
+
           {!hasActiveEval && (
             <button
               onClick={onCreateEval}
-              className="bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium px-4 py-1.5 
-                rounded-lg transition-colors cursor-pointer hidden sm:block"
+              className="flex items-center gap-1.5 bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium px-4 py-1.5
+    rounded-lg transition-colors cursor-pointer hidden sm:flex"
             >
-              + Nueva
+              <DocumentPlusIcon className="size-5" />
+              <span>Nueva</span>
             </button>
           )}
-
+          {!user && (
+            <button
+              onClick={onLogin}
+              className="flex items-center gap-1.5 bg-gray-900 hover:bg-gray-800 text-white text-sm font-medium px-4 py-1.5
+      rounded-lg transition-colors cursor-pointer hidden sm:flex"
+            >
+              <LockClosedIcon className="size-5" />
+              <span>Iniciar sesión</span>
+            </button>
+          )}
           {/* Menú de usuario */}
           {user && (
             <div className="relative">
@@ -168,8 +193,10 @@ export default function Header({
               </button>
 
               {showUserMenu && (
-                <div className="absolute right-0 top-full mt-1 bg-white border border-gray-200 rounded-lg 
-                  shadow-lg py-1 z-50 min-w-[200px]">
+                <div
+                  className="absolute right-0 top-full mt-1 bg-white border border-gray-200 rounded-lg 
+                  shadow-lg py-1 z-50 min-w-[200px]"
+                >
                   {/* Info del usuario */}
                   <div className="px-4 py-2 border-b border-gray-100">
                     <p className="text-sm font-medium text-gray-800 truncate">
@@ -179,8 +206,10 @@ export default function Header({
                       {user.email}
                     </p>
                     {user.isAnonymous && (
-                      <span className="inline-block mt-1 text-[10px] bg-yellow-100 text-yellow-700 
-                        px-1.5 py-0.5 rounded-full">
+                      <span
+                        className="inline-block mt-1 text-[10px] bg-yellow-100 text-yellow-700 
+                        px-1.5 py-0.5 rounded-full"
+                      >
                         Modo local
                       </span>
                     )}
@@ -196,7 +225,9 @@ export default function Header({
                       className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 
                         transition-colors cursor-pointer flex items-center gap-2"
                     >
-                      <span>🔒</span>
+                      <span>
+                        <LockClosedIcon className="size-5" />
+                      </span>
                       Iniciar sesión para guardar
                     </button>
                   ) : (
@@ -208,7 +239,9 @@ export default function Header({
                       className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-red-50 
                         hover:text-red-600 transition-colors cursor-pointer flex items-center gap-2"
                     >
-                      <span>🚪</span>
+                      <span>
+                        <ArrowRightEndOnRectangleIcon className="size-5" />
+                      </span>
                       Cerrar sesión
                     </button>
                   )}

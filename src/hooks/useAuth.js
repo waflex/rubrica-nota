@@ -48,7 +48,6 @@ export function useAuth() {
     }
     try {
       await signOut(auth);
-      setUser(null);
     } catch (error) {
       console.error("Error al cerrar sesión:", error);
     }

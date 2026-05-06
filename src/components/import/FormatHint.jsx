@@ -1,25 +1,27 @@
 // src/components/import/FormatHint.jsx
+import { DocumentTextIcon, LightBulbIcon, TableCellsIcon } from "@heroicons/react/24/outline";
 import { useState } from "react";
 
 /**
  * Componente que muestra el formato esperado para la importación
- * @param {Array} headers - Nombres de las columnas
- * @param {Array} rows - Filas de ejemplo
- * @param {string} title - Título descriptivo
- * @param {string} type - Tipo de archivo ('excel' o 'csv')
  */
-export default function FormatHint({ 
-  headers = [], 
-  rows = [], 
+export default function FormatHint({
+  headers = [],
+  rows = [],
   title = "Formato esperado",
-  type = "excel" 
+  type = "excel",
 }) {
   const [isExpanded, setIsExpanded] = useState(false);
 
-  // Si no hay datos, no mostrar nada
-  if (!headers.length || !rows.length) return null;
+  // Validar que sean arrays
+  const validHeaders = Array.isArray(headers) ? headers : [];
+  const validRows = Array.isArray(rows) ? rows : [];
 
-  const icon = type === "csv" ? "📄" : "📊";
+  // Si no hay datos, no mostrar nada
+  if (!validHeaders.length || !validRows.length) return null;
+
+  // ✅ Seleccionar el COMPONENTE correcto (no guardarlo en variable)
+  const IconComponent = type === "csv" ? DocumentTextIcon : TableCellsIcon;
   const fileType = type === "csv" ? "CSV" : "Excel (.xlsx)";
 
   return (
@@ -29,19 +31,22 @@ export default function FormatHint({
         onClick={() => setIsExpanded(!isExpanded)}
         className="w-full flex items-center justify-between px-4 py-3 hover:bg-blue-100 transition-colors cursor-pointer"
         aria-expanded={isExpanded}
+        type="button"
       >
         <div className="flex items-center gap-2">
-          <span className="text-lg">{icon}</span>
+          {/* ✅ Renderizar el componente como JSX, no como string */}
+          <IconComponent className="size-5 text-blue-600 flex-shrink-0" />
           <div className="text-left">
             <p className="text-xs font-semibold text-blue-800">
               {title} ({fileType})
             </p>
             <p className="text-[11px] text-blue-600">
-              {headers.length} columnas · {rows.length} filas de ejemplo
+              {validHeaders.length} columna(s) · {validRows.length} fila(s) de ejemplo
             </p>
           </div>
         </div>
-        <span className="text-blue-400 transition-transform duration-200"
+        <span
+          className="text-blue-400 transition-transform duration-200 text-xs"
           style={{ transform: isExpanded ? "rotate(180deg)" : "rotate(0deg)" }}
         >
           ▼
@@ -53,14 +58,38 @@ export default function FormatHint({
         <div className="border-t border-blue-200 animate-in slide-in-from-top-2 duration-200">
           <div className="p-4 space-y-3">
             {/* Consejos */}
-            <div className="text-[11px] text-blue-700 bg-blue-100/50 rounded-lg p-3">
-              <p className="font-semibold mb-1">💡 Consejos:</p>
-              <ul className="list-disc list-inside space-y-0.5 ml-1">
-                <li>Los nombres de columnas pueden variar (ej: "nombre", "name", "alumno")</li>
-                <li>Se detectan automáticamente las columnas requeridas</li>
-                <li>Las filas vacías se ignoran automáticamente</li>
+            <div className="text-[11px] text-blue-700 bg-blue-100/50 rounded-lg p-3 space-y-2">
+              {/* Header */}
+              <div className="flex items-center gap-1.5 font-semibold">
+                <LightBulbIcon className="size-3.5 flex-shrink-0" />
+                <p>Consejos</p>
+              </div>
+
+              {/* Lista */}
+              <ul className="space-y-1">
+                <li className="flex items-start gap-1.5">
+                  <span className="mt-1 w-1 h-1 bg-blue-500 rounded-full flex-shrink-0"></span>
+                  <span>
+                    Los nombres de columnas pueden variar (ej: "nombre", "name", "alumno")
+                  </span>
+                </li>
+                <li className="flex items-start gap-1.5">
+                  <span className="mt-1 w-1 h-1 bg-blue-500 rounded-full flex-shrink-0"></span>
+                  <span>
+                    Se detectan automáticamente las columnas requeridas
+                  </span>
+                </li>
+                <li className="flex items-start gap-1.5">
+                  <span className="mt-1 w-1 h-1 bg-blue-500 rounded-full flex-shrink-0"></span>
+                  <span>Las filas vacías se ignoran automáticamente</span>
+                </li>
                 {type === "csv" && (
-                  <li>Para CSV, puedes usar coma (,) o punto y coma (;) como separador</li>
+                  <li className="flex items-start gap-1.5">
+                    <span className="mt-1 w-1 h-1 bg-blue-500 rounded-full flex-shrink-0"></span>
+                    <span>
+                      Puedes usar coma (,) o punto y coma (;) como separador
+                    </span>
+                  </li>
                 )}
               </ul>
             </div>
@@ -71,35 +100,40 @@ export default function FormatHint({
                 <table className="w-full text-[11px]">
                   <thead>
                     <tr className="bg-blue-100">
-                      {headers.map((header, i) => (
-                        <th 
-                          key={i} 
+                      {validHeaders.map((header, i) => (
+                        <th
+                          key={i}
                           className="px-3 py-2 text-left font-semibold text-blue-800 whitespace-nowrap"
                         >
-                          {header}
+                          {typeof header === "string" ? header : String(header)}
                         </th>
                       ))}
                     </tr>
                   </thead>
                   <tbody>
-                    {rows.map((row, i) => (
-                      <tr 
-                        key={i} 
-                        className={`
-                          ${i % 2 === 0 ? "bg-white" : "bg-blue-50/50"}
-                          hover:bg-blue-100/50 transition-colors
-                        `}
-                      >
-                        {row.map((cell, j) => (
-                          <td 
-                            key={j} 
-                            className="px-3 py-1.5 text-blue-700 whitespace-nowrap"
-                          >
-                            {cell}
-                          </td>
-                        ))}
-                      </tr>
-                    ))}
+                    {validRows.map((row, i) => {
+                      // Asegurar que row sea un array
+                      const safeRow = Array.isArray(row) ? row : [];
+                      
+                      return (
+                        <tr
+                          key={i}
+                          className={`
+                            ${i % 2 === 0 ? "bg-white" : "bg-blue-50/50"}
+                            hover:bg-blue-100/50 transition-colors
+                          `}
+                        >
+                          {safeRow.map((cell, j) => (
+                            <td
+                              key={j}
+                              className="px-3 py-1.5 text-blue-700 whitespace-nowrap"
+                            >
+                              {typeof cell === "string" ? cell : String(cell ?? "")}
+                            </td>
+                          ))}
+                        </tr>
+                      );
+                    })}
                   </tbody>
                 </table>
               </div>

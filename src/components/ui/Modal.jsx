@@ -1,4 +1,3 @@
-// src/components/ui/Modal.jsx
 import { useEffect, useCallback } from "react";
 
 /**
