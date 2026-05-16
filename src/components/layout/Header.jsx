@@ -19,7 +19,6 @@ export default function Header({
   evalNombre,
   onEvalNombreChange,
   hasActiveEval,
-  onCreateEval,
 }) {
   const [showUserMenu, setShowUserMenu] = useState(false);
   const [showImportMenu, setShowImportMenu] = useState(false);

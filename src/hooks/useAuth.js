@@ -12,7 +12,7 @@ export function useAuth() {
     // ✅ Iniciar como usuario anónimo por defecto
     return { isAnonymous: true, uid: "local" };
   });
-  const [authLoading, setAuthLoading] = useState(false); // ✅ Ya no carga, es inmediato
+  const [authLoading] = useState(false); // ✅ Ya no carga, es inmediato
   const [loginLoading, setLoginLoading] = useState(false);
 
   // Escuchar cambios de autenticación de Firebase
