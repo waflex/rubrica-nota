@@ -119,3 +119,7 @@ Este proyecto está bajo la Licencia MIT. Ver el archivo [LICENSE](LICENSE) para
 ## Soporte
 
 Para soporte o preguntas, por favor abre un issue en el repositorio de GitHub.
+
+---
+
+Desarrollado por JRTDEV

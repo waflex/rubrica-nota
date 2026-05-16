@@ -1,0 +1,12 @@
+{
+  "project": "rubrica-notas",
+  "created_at": "2026-05-16T00:00:00Z",
+  "author": "OpenCode (assistant)",
+  "entries": [
+    {
+      "id": "init",
+      "date": "2026-05-16T00:00:00Z",
+      "note": "Archivo .toon creado para almacenar recuerdos y metadatos del proyecto. Se agregó 'Desarrollado por JRTDEV' en el footer de la app, el sidebar y README."
+    }
+  ]
+}

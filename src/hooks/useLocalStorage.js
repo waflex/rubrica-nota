@@ -75,6 +75,7 @@ export function useLocalStorage(key, initialValue) {
                         setStoredValue(JSON.parse(e.newValue));
                     } catch (error) {
                         setStoredValue(e.newValue);
+                        console.error(`Error parsing localStorage key "${keyRef.current}":`, error);
                     }
                 } else {
                     setStoredValue(initialValue);
