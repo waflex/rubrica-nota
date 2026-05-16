@@ -203,6 +203,8 @@ export default function Sidebar({
               Datos sincronizados en la nube
             </p>
           )}
+          {/* Créditos */}
+          <p className="text-[10px] text-gray-300 mt-1">Desarrollado por JRTDEV</p>
         </div>
       </div>
 

@@ -314,6 +314,10 @@ export default function App() {
           onImport={handleImportRubrica}
         />
       )}
+      {/* Global footer visible en toda la aplicación */}
+      <footer className="w-full text-center text-xs text-gray-400 py-2 border-t border-gray-100">
+        Desarrollado por JRTDEV
+      </footer>
     </div>
   );
 }
