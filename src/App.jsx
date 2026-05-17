@@ -1,5 +1,6 @@
 // src/App.jsx
 import { useState, useCallback } from "react";
+import toast from "react-hot-toast";
 import { useAuth } from "./hooks/useAuth";
 import { useEvaluations } from "./hooks/useEvaluations";
 import { useLocalStorage } from "./hooks/useLocalStorage";
@@ -23,6 +24,8 @@ import {
 
 import "./App.css";
 
+
+
 export default function App() {
   const { user, loginLoading, handleLogin, handleLogout } = useAuth();
 
@@ -35,9 +38,13 @@ export default function App() {
     updateEvalData,
     crearEvaluacion,
     eliminarEvaluacion,
+    clonarEvaluacion,
   } = useEvaluations(user);
 
-  const [sidebarOpen, setSidebarOpen] = useLocalStorage("rubrica_sidebar_open", true);
+  const [sidebarOpen, setSidebarOpen] = useLocalStorage(
+    "rubrica_sidebar_open",
+    true,
+  );
   const [modalImportAlumnos, setModalImportAlumnos] = useState(false);
   const [modalImportRubrica, setModalImportRubrica] = useState(false);
 
@@ -53,7 +60,15 @@ export default function App() {
   );
 
   const handleDeleteEval = useCallback(
-    async (id) => { await eliminarEvaluacion(id); },
+    async (id) => {
+      try {
+        await eliminarEvaluacion(id);
+        toast.success("Evaluación eliminada");
+      } catch (err) {
+        console.error(err);
+        toast.error("Error al eliminar evaluación");
+      }
+    },
     [eliminarEvaluacion],
   );
 
@@ -96,7 +111,11 @@ export default function App() {
       ...prev,
       criterios: [
         ...prev.criterios,
-        { id: localId("c"), nombre: `Criterio ${prev.criterios.length + 1}`, puntajeMax: 10 },
+        {
+          id: localId("c"),
+          nombre: `Criterio ${prev.criterios.length + 1}`,
+          puntajeMax: 10,
+        },
       ],
     }));
   }, [updateEvalData]);
@@ -133,7 +152,8 @@ export default function App() {
     (newAlumnos, mode) => {
       updateEvalData((prev) => ({
         ...prev,
-        alumnos: mode === "replace" ? newAlumnos : [...prev.alumnos, ...newAlumnos],
+        alumnos:
+          mode === "replace" ? newAlumnos : [...prev.alumnos, ...newAlumnos],
       }));
     },
     [updateEvalData],
@@ -143,24 +163,30 @@ export default function App() {
     (newCriterios, mode) => {
       updateEvalData((prev) => ({
         ...prev,
-        criterios: mode === "replace" ? newCriterios : [...prev.criterios, ...newCriterios],
-        alumnos: mode === "replace" ? prev.alumnos.map((a) => ({ ...a, puntajes: {} })) : prev.alumnos,
+        criterios:
+          mode === "replace"
+            ? newCriterios
+            : [...prev.criterios, ...newCriterios],
+        alumnos:
+          mode === "replace"
+            ? prev.alumnos.map((a) => ({ ...a, puntajes: {} }))
+            : prev.alumnos,
       }));
     },
     [updateEvalData],
   );
 
   const handleEvalNombreChange = useCallback(
-    (nombre) => { updateEvalData((prev) => ({ ...prev, nombre })); },
+    (nombre) => {
+      updateEvalData((prev) => ({ ...prev, nombre }));
+    },
     [updateEvalData],
   );
 
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col">
-
       {/* Fila principal: sidebar + contenido */}
       <div className="flex flex-1 min-h-0">
-
         {/* Sidebar */}
         <Sidebar
           isOpen={sidebarOpen}
@@ -169,12 +195,27 @@ export default function App() {
           onSelect={seleccionarEval}
           onDelete={handleDeleteEval}
           onCreate={handleCreateEval}
+          onClone={async (id) => {
+            try {
+              const newId = await clonarEvaluacion(id);
+              if (newId) {
+                seleccionarEval(newId);
+                toast.success("Evaluación duplicada");
+                return newId;
+              }
+              toast.error("No se pudo duplicar");
+              return null;
+            } catch (err) {
+              console.error(err);
+              toast.error("Error al duplicar");
+              return null;
+            }
+          }}
           user={user}
         />
 
         {/* Contenido principal */}
         <div className="flex-1 min-w-0 flex flex-col">
-
           {/* Header */}
           <Header
             user={user}
@@ -182,6 +223,17 @@ export default function App() {
             onToggleSidebar={() => setSidebarOpen((prev) => !prev)}
             onImportAlumnos={() => setModalImportAlumnos(true)}
             onImportRubrica={() => setModalImportRubrica(true)}
+            onExportExcel={() =>
+              import("./utils/exportExcel").then((m) =>
+                m
+                  .exportEvaluationToExcel(evalData, stats.stats)
+                  .then(() => toast.success("Exportado a Excel"))
+                  .catch((err) => {
+                    console.error(err);
+                    toast.error("Error exportando a Excel");
+                  }),
+              )
+            }
             onLogin={handleLogin}
             onLogout={handleLogout}
             loginLoading={loginLoading}
@@ -189,6 +241,15 @@ export default function App() {
             onEvalNombreChange={handleEvalNombreChange}
             hasActiveEval={!!evalActivaId}
             onCreateEval={() => handleCreateEval()}
+            onExportPdf={() =>
+              import("./utils/exportPdf")
+                .then((m) => m.exportEvaluationToPdf(evalData, stats.stats))
+                .then(() => toast.success("Exportado a PDF"))
+                .catch((err) => {
+                  console.error(err);
+                  toast.error("Error exportando a PDF");
+                })
+            }
           />
 
           {/* Área de contenido */}
@@ -204,8 +265,8 @@ export default function App() {
                       Selecciona o crea una evaluación
                     </p>
                     <p className="text-sm text-gray-500 max-w-md">
-                      Cada evaluación tiene su propia rúbrica, lista de alumnos y
-                      configuración de escala personalizada.
+                      Cada evaluación tiene su propia rúbrica, lista de alumnos
+                      y configuración de escala personalizada.
                     </p>
                   </div>
                 </div>
@@ -221,17 +282,35 @@ export default function App() {
 
                 <div className="mt-8 grid grid-cols-1 sm:grid-cols-2 gap-3 max-w-lg">
                   {[
-                    { icon: <AcademicCapIcon className="size-5" />, text: "Define criterios con puntajes máximos" },
-                    { icon: <UserGroupIcon className="size-5" />, text: "Agrega alumnos manualmente o por archivo" },
-                    { icon: <CalculatorIcon className="size-5" />, text: "Calcula notas con escala chilena" },
-                    { icon: <PencilSquareIcon className="size-5" />, text: "Guarda en la nube o localmente" },
+                    {
+                      icon: <AcademicCapIcon className="size-5" />,
+                      text: "Define criterios con puntajes máximos",
+                    },
+                    {
+                      icon: <UserGroupIcon className="size-5" />,
+                      text: "Agrega alumnos manualmente o por archivo",
+                    },
+                    {
+                      icon: <CalculatorIcon className="size-5" />,
+                      text: "Calcula notas con escala chilena",
+                    },
+                    {
+                      icon: <PencilSquareIcon className="size-5" />,
+                      text: "Guarda en la nube o localmente",
+                    },
                   ].map((tip, i) => (
-                    <div key={i} className="bg-white rounded-lg border border-gray-200 p-3 flex items-center gap-2">
+                    <div
+                      key={i}
+                      className="bg-white rounded-lg border border-gray-200 p-3 flex items-center gap-2"
+                    >
                       <span className="text-lg">{tip.icon}</span>
-                      <p className="text-xs text-gray-600 text-left">{tip.text}</p>
+                      <p className="text-xs text-gray-600 text-left">
+                        {tip.text}
+                      </p>
                     </div>
                   ))}
                 </div>
+               
               </div>
             ) : (
               <EvaluationForm
@@ -245,12 +324,33 @@ export default function App() {
                 onAddCriterio={handleAddCriterio}
                 onUpdateCriterio={handleUpdateCriterio}
                 onDeleteCriterio={handleDeleteCriterio}
+                onEditAlumno={(alumnoId, nombre) =>
+                  updateEvalData((prev) => ({
+                    ...prev,
+                    alumnos: prev.alumnos.map((a) =>
+                      a.id === alumnoId ? { ...a, nombre } : a,
+                    ),
+                  }))
+                }
               />
             )}
           </main>
-
-        </div>{/* fin contenido principal */}
-      </div>{/* fin fila principal */}
+          {/* Footer */}
+          <footer className="w-full text-center text-xs text-gray-400 py-2 bg-gray-50 shrink-0">
+            {"hecho con ♥ por "}
+            <a
+              href="https://jrtdev.cl"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-blue-500 hover:text-blue-600 hover:underline transition-colors"
+            >
+              JRTDEV
+            </a>
+          </footer>
+        </div>
+        {/* fin contenido principal */}
+      </div>
+      {/* fin fila principal */}
 
       {/* Modales */}
       {modalImportAlumnos && (
@@ -265,20 +365,6 @@ export default function App() {
           onImport={handleImportRubrica}
         />
       )}
-
-      {/* Footer */}
-      <footer className="w-full text-center text-xs text-gray-400 py-2 border-t border-gray-100 bg-white shrink-0">
-        {"hecho con ♥ por "}
-        <a
-          href="https://github.com/waflex"
-          target="_blank"
-          rel="noopener noreferrer"
-          className="text-blue-500 hover:text-blue-600 hover:underline transition-colors"
-        >
-          JRTDEV
-        </a>
-      </footer>
-
     </div>
   );
 }
