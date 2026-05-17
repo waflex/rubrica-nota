@@ -13,6 +13,8 @@ export default function Header({
   onToggleSidebar,
   onImportAlumnos,
   onImportRubrica,
+  onExportExcel,
+  onExportPdf,
   onLogin,
   onLogout,
   loginLoading,
@@ -22,6 +24,7 @@ export default function Header({
 }) {
   const [showUserMenu, setShowUserMenu] = useState(false);
   const [showImportMenu, setShowImportMenu] = useState(false);
+  const [showExportMenu, setShowExportMenu] = useState(false);
 
   const handleBlur = (setter) => {
     setTimeout(() => setter(false), 200);
@@ -33,8 +36,8 @@ export default function Header({
         {/* Botón menú sidebar */}
         <button
           onClick={onToggleSidebar}
-          className="text-gray-400 hover:text-gray-600 text-xl leading-none p-1 rounded-lg 
-            hover:bg-gray-100 transition-colors cursor-pointer flex-shrink-0"
+            className="text-gray-400 hover:text-gray-600 text-xl leading-none p-1 rounded-lg 
+              hover:bg-gray-100 transition-colors cursor-pointer shrink-0"
           aria-label="Mostrar/ocultar menú lateral"
           title="Menú lateral"
         >
@@ -61,7 +64,7 @@ export default function Header({
         </div>
 
         {/* Acciones */}
-        <div className="flex items-center gap-2 flex-shrink-0">
+        <div className="flex items-center gap-2 shrink-0">
           {/* Indicador de guardado */}
           {hasActiveEval && (
             <div className="hidden sm:block">
@@ -120,6 +123,53 @@ export default function Header({
                   >
                     <span>📊</span>
                     Importar rúbrica
+                  </button>
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* Botón Exportar (dropdown) */}
+          {hasActiveEval && (
+            <div className="relative">
+              <button
+                onClick={() => setShowExportMenu((s) => !s)}
+                onBlur={() => handleBlur(setShowExportMenu)}
+                className="flex items-center gap-1.5 bg-white hover:bg-gray-50 text-gray-700 text-xs font-medium 
+                  px-3 py-1.5 rounded-lg border border-gray-200 transition-colors cursor-pointer"
+                aria-haspopup="true"
+                aria-expanded={showExportMenu}
+              >
+                📤 Exportar
+                <span className="text-gray-400">▼</span>
+              </button>
+
+              {showExportMenu && (
+                <div
+                  className="absolute right-0 top-full mt-1 bg-white border border-gray-200 rounded-lg 
+                  shadow-lg py-1 z-50 min-w-[160px]"
+                >
+                  <button
+                    onClick={() => {
+                      onExportExcel && onExportExcel();
+                      setShowExportMenu(false);
+                    }}
+                    className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 
+                      transition-colors cursor-pointer flex items-center gap-2"
+                  >
+                    <span>📤</span>
+                    Exportar a Excel
+                  </button>
+                  <button
+                    onClick={() => {
+                      onExportPdf && onExportPdf();
+                      setShowExportMenu(false);
+                    }}
+                    className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 
+                      transition-colors cursor-pointer flex items-center gap-2"
+                  >
+                    <span>📄</span>
+                    Exportar a PDF
                   </button>
                 </div>
               )}
