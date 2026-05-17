@@ -35,7 +35,7 @@ export default function FormatHint({
       >
         <div className="flex items-center gap-2">
           {/* ✅ Renderizar el componente como JSX, no como string */}
-          <IconComponent className="size-5 text-blue-600 flex-shrink-0" />
+          <IconComponent className="size-5 text-blue-600 shrink-0" />
           <div className="text-left">
             <p className="text-xs font-semibold text-blue-800">
               {title} ({fileType})
@@ -61,31 +61,31 @@ export default function FormatHint({
             <div className="text-[11px] text-blue-700 bg-blue-100/50 rounded-lg p-3 space-y-2">
               {/* Header */}
               <div className="flex items-center gap-1.5 font-semibold">
-                <LightBulbIcon className="size-3.5 flex-shrink-0" />
+                <LightBulbIcon className="size-3.5 shrink-0" />
                 <p>Consejos</p>
               </div>
 
               {/* Lista */}
               <ul className="space-y-1">
                 <li className="flex items-start gap-1.5">
-                  <span className="mt-1 w-1 h-1 bg-blue-500 rounded-full flex-shrink-0"></span>
+                  <span className="mt-1 w-1 h-1 bg-blue-500 rounded-full shrink-0"></span>
                   <span>
                     Los nombres de columnas pueden variar (ej: "nombre", "name", "alumno")
                   </span>
                 </li>
                 <li className="flex items-start gap-1.5">
-                  <span className="mt-1 w-1 h-1 bg-blue-500 rounded-full flex-shrink-0"></span>
+                  <span className="mt-1 w-1 h-1 bg-blue-500 rounded-full shrink-0"></span>
                   <span>
                     Se detectan automáticamente las columnas requeridas
                   </span>
                 </li>
                 <li className="flex items-start gap-1.5">
-                  <span className="mt-1 w-1 h-1 bg-blue-500 rounded-full flex-shrink-0"></span>
+                  <span className="mt-1 w-1 h-1 bg-blue-500 rounded-full shrink-0"></span>
                   <span>Las filas vacías se ignoran automáticamente</span>
                 </li>
                 {type === "csv" && (
                   <li className="flex items-start gap-1.5">
-                    <span className="mt-1 w-1 h-1 bg-blue-500 rounded-full flex-shrink-0"></span>
+                    <span className="mt-1 w-1 h-1 bg-blue-500 rounded-full shrink-0"></span>
                     <span>
                       Puedes usar coma (,) o punto y coma (;) como separador
                     </span>

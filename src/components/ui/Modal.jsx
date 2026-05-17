@@ -55,7 +55,7 @@ export default function Modal({
       >
         {/* Header */}
         {title && (
-          <div className="flex items-center justify-between px-6 py-4 border-b border-gray-100 flex-shrink-0">
+          <div className="flex items-center justify-between px-6 py-4 border-b border-gray-100 shrink-0">
             <h2 
               id="modal-title"
               className="text-base font-semibold text-gray-800"

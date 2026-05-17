@@ -117,6 +117,22 @@ export function useEvaluations(user) {
     return id;
   }, []);
 
+  const clonarEvaluacion = useCallback(async (id) => {
+    if (!storageRef.current || !id) return null;
+    const existing = (await storageRef.current.get(id)) || null;
+    if (!existing) return null;
+
+    const cloneName = `${existing.nombre || 'Copia de evaluación'}`;
+    const newId = await storageRef.current.create({
+      nombre: cloneName,
+      escala: existing.escala ?? EMPTY_EVAL.escala,
+      criterios: existing.criterios ?? EMPTY_EVAL.criterios,
+      alumnos: [], // por spec: clonar criterios y escala, sin alumnos ni puntajes
+    });
+
+    return newId;
+  }, []);
+
   const eliminarEvaluacion = useCallback(async (id) => {
     if (!storageRef.current) return;
     await storageRef.current.delete(id);
@@ -146,6 +162,7 @@ export function useEvaluations(user) {
     updateEvalData,
     crearEvaluacion,
     eliminarEvaluacion,
+    clonarEvaluacion,
     resetEvaluations, // ✅ Exportado
   };
 }
