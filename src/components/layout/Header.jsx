@@ -63,8 +63,8 @@ export default function Header({
           )}
         </div>
 
-        {/* Acciones */}
-        <div className="flex items-center gap-2 shrink-0">
+          {/* Acciones */}
+          <div className="flex items-center gap-2 shrink-0">
           {/* Indicador de guardado */}
           {hasActiveEval && (
             <div className="hidden sm:block">

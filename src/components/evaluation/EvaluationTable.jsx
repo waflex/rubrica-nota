@@ -41,8 +41,12 @@ export default function EvaluationTable({
   onDeleteAlumno,
   onEditCriterio,
   onDeleteCriterio,
+  onEditAlumno,
 }) {
   const [editandoCriterio, setEditandoCriterio] = useState(null);
+  const [editAlumnoId, setEditAlumnoId] = useState(null);
+  const [editAlumnoNombre, setEditAlumnoNombre] = useState("");
+  const [sortOrder, setSortOrder] = useState("none"); // none | asc | desc
 
   // Calcular estadísticas por alumno
   const alumnosConNotas = alumnos.map((alumno) => {
@@ -55,6 +59,14 @@ export default function EvaluationTable({
 
     return { ...alumno, puntajeTotal, nota };
   });
+
+  // Apply sorting if requested
+  const displayedAlumnos = [...alumnosConNotas];
+  if (sortOrder === "asc") {
+    displayedAlumnos.sort((a, b) => a.nota - b.nota);
+  } else if (sortOrder === "desc") {
+    displayedAlumnos.sort((a, b) => b.nota - a.nota);
+  }
 
   // Si no hay criterios, mostrar mensaje
   if (!criterios || criterios.length === 0) {
@@ -149,9 +161,20 @@ export default function EvaluationTable({
               </th>
 
               {/* Columna Nota */}
-              <th className="px-5 py-3 text-center text-xs font-semibold text-gray-400 uppercase tracking-wider min-w-[100px]">
-                Nota
-              </th>
+               <th className="px-5 py-3 text-center text-xs font-semibold text-gray-400 uppercase tracking-wider min-w-[100px]">
+                 <div className="flex items-center justify-center gap-2">
+                   <span>Nota</span>
+                   <div className="flex items-center gap-1">
+                     <button
+                       onClick={() => setSortOrder((s) => (s === 'none' ? 'desc' : s === 'desc' ? 'asc' : 'none'))}
+                       className="text-xs text-gray-400 hover:text-gray-600 px-2 py-0.5 rounded cursor-pointer"
+                       title="Ordenar por nota"
+                     >
+                       {sortOrder === 'none' ? '⇅' : sortOrder === 'desc' ? '↓' : '↑'}
+                     </button>
+                   </div>
+                 </div>
+               </th>
 
               {/* Columna Acciones */}
               <th className="w-10"></th>
@@ -159,8 +182,8 @@ export default function EvaluationTable({
           </thead>
 
           <tbody>
-            {alumnosConNotas.length > 0 ? (
-              alumnosConNotas.map((alumno, idx) => (
+               {displayedAlumnos.length > 0 ? (
+               displayedAlumnos.map((alumno, idx) => (
                 <tr
                   key={alumno.id}
                   className={`border-b border-gray-50 transition-colors
@@ -168,14 +191,42 @@ export default function EvaluationTable({
                     hover:bg-blue-50/30`}
                 >
                   {/* Nombre alumno - Sticky */}
-                  <td className={`px-5 py-2.5 font-medium text-gray-700 sticky left-0 z-[5]
-                    ${idx % 2 === 1 ? "bg-gray-50/50" : "bg-white"}`}>
+                   <td className={`px-5 py-2.5 font-medium text-gray-700 sticky left-0 z-[5]
+                     ${idx % 2 === 1 ? "bg-gray-50/50" : "bg-white"}`}>
                     <div className="flex items-center gap-2">
                       <span className="w-6 h-6 rounded-full bg-blue-100 text-blue-600 text-xs 
-                        flex items-center justify-center font-medium flex-shrink-0">
+                        flex items-center justify-center font-medium shrink-0">
                         {idx + 1}
                       </span>
-                      <span className="truncate">{alumno.nombre || "Sin nombre"}</span>
+                      {editAlumnoId === alumno.id ? (
+                        <input
+                          autoFocus
+                          value={editAlumnoNombre}
+                          onChange={(e) => setEditAlumnoNombre(e.target.value)}
+                          onKeyDown={(e) => {
+                            if (e.key === "Enter") {
+                              onEditAlumno?.(alumno.id, editAlumnoNombre.trim());
+                              setEditAlumnoId(null);
+                            }
+                            if (e.key === "Escape") {
+                              setEditAlumnoId(null);
+                            }
+                          }}
+                          onBlur={() => setEditAlumnoId(null)}
+                          className="w-full border border-gray-200 rounded px-2 py-1 text-sm"
+                        />
+                      ) : (
+                        <span
+                          className="truncate cursor-text"
+                          onDoubleClick={() => {
+                            setEditAlumnoId(alumno.id);
+                            setEditAlumnoNombre(alumno.nombre || "");
+                          }}
+                          title="Doble clic para editar"
+                        >
+                          {alumno.nombre || "Sin nombre"}
+                        </span>
+                      )}
                     </div>
                   </td>
 
@@ -205,7 +256,7 @@ export default function EvaluationTable({
                   </td>
 
                   {/* Nota */}
-                  <td className="px-5 py-2 text-center">
+                   <td className="px-5 py-2 text-center">
                     <span
                       className={`inline-block px-3 py-1 rounded-lg font-semibold text-base min-w-[3rem] tabular-nums
                         ${alumno.nota >= (scale.nApr || 4)

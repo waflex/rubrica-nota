@@ -89,7 +89,7 @@ export default function EvaluationForm({
           <button
             onClick={handleAddAlumno}
             className="bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium px-4 py-2 
-              rounded-lg transition-colors cursor-pointer flex-shrink-0"
+              rounded-lg transition-colors cursor-pointer shrink-0"
           >
             + Agregar
           </button>

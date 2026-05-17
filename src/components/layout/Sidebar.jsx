@@ -6,6 +6,7 @@ import {
   TrashIcon,
 } from "@heroicons/react/24/outline";
 import { useState } from "react";
+import KoFiButton from "../ui/KoFiButton";
 
 /**
  * Sidebar de navegación con lista de evaluaciones
@@ -24,6 +25,7 @@ export default function Sidebar({
   onSelect,
   onDelete,
   onCreate,
+  onClone,
   user,
 }) {
   const [showCreateModal, setShowCreateModal] = useState(false);
@@ -55,7 +57,7 @@ export default function Sidebar({
       className={`
         ${isOpen ? "w-64" : "w-0 overflow-hidden"}
         transition-all duration-300 ease-in-out
-        bg-white border-r border-gray-200 flex flex-col flex-shrink-0
+        bg-white border-r border-gray-200 flex flex-col shrink-0
       `}
     >
       {/* Header del sidebar */}
@@ -78,10 +80,10 @@ export default function Sidebar({
               <img
                 src={user.photoURL}
                 alt=""
-                className="w-8 h-8 rounded-full flex-shrink-0"
+                className="w-8 h-8 rounded-full shrink-0"
               />
             ) : (
-              <div className="w-8 h-8 rounded-full bg-gray-200 flex items-center justify-center text-sm text-gray-500 flex-shrink-0">
+              <div className="w-8 h-8 rounded-full bg-gray-200 flex items-center justify-center text-sm text-gray-500 shrink-0">
                 {(user.displayName || user.email || "U")[0].toUpperCase()}
               </div>
             )}
@@ -182,6 +184,23 @@ export default function Sidebar({
                       <TrashIcon className="size-4" />
                     )}
                   </button>
+                  {/* Duplicar */}
+                  <button
+                    onClick={async (e) => {
+                      e.stopPropagation();
+                      try {
+                        const newId = await onClone?.(eva.id);
+                        if (newId) onSelect(newId);
+                      } catch (err) {
+                        console.error('Error duplicando evaluación', err);
+                      }
+                    }}
+                    className={`opacity-0 group-hover:opacity-100 text-gray-300 hover:text-gray-600 text-xs ml-2 transition-all p-1 rounded hover:bg-gray-50`}
+                    title="Duplicar evaluación"
+                    aria-label={`Duplicar ${eva.nombre}`}
+                  >
+                    +
+                  </button>
                 </div>
               ))
             )}
@@ -204,7 +223,9 @@ export default function Sidebar({
             </p>
           )}
           {/* Créditos */}
-          <p className="text-[10px] text-gray-300 mt-1">Desarrollado por JRTDEV</p>
+          
+            {/* Ko-fi button (minimal) */}
+            <KoFiButton />
         </div>
       </div>
 

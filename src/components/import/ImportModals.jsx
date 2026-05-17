@@ -1,5 +1,6 @@
 // src/components/import/ImportModals.jsx
 import { useState } from "react";
+import toast from 'react-hot-toast'
 import Modal from "../ui/Modal";
 import DropZone from "./DropZone";
 import FormatHint from "./FormatHint";
@@ -45,6 +46,7 @@ export function ImportAlumnosModal({ onClose, onImport }) {
     }));
 
     onImport(newAlumnos, mode);
+    toast.success('Alumnos importados');
     onClose();
   };
 
@@ -155,6 +157,7 @@ export function ImportRubricaModal({ onClose, onImport }) {
     }));
 
     onImport(newCriterios, mode);
+    toast.success('Rúbrica importada');
     onClose();
   };
 
