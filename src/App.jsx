@@ -12,7 +12,6 @@ import {
 } from "./components/import/ImportModals";
 import { localId } from "./utils/constants";
 import { calcularEstadisticas } from "./utils/calculations";
-//Hero Icons
 import {
   PencilSquareIcon,
   UserGroupIcon,
@@ -25,15 +24,8 @@ import {
 import "./App.css";
 
 export default function App() {
-  // Autenticación
-  const {
-    user,
-    loginLoading,
-    handleLogin,
-    handleLogout,
-  } = useAuth();
+  const { user, loginLoading, handleLogin, handleLogout } = useAuth();
 
-  // Evaluaciones
   const {
     evaluaciones,
     evalActivaId,
@@ -45,34 +37,26 @@ export default function App() {
     eliminarEvaluacion,
   } = useEvaluations(user);
 
-  // Estado local de UI - sidebar persiste en localStorage
   const [sidebarOpen, setSidebarOpen] = useLocalStorage("rubrica_sidebar_open", true);
   const [modalImportAlumnos, setModalImportAlumnos] = useState(false);
   const [modalImportRubrica, setModalImportRubrica] = useState(false);
 
-  // Derivados
   const { escala, criterios, alumnos } = evalData;
   const stats = calcularEstadisticas(alumnos, criterios, escala);
 
-  // Manejadores de evaluación
   const handleCreateEval = useCallback(
     async (nombre) => {
       const id = await crearEvaluacion(nombre);
-      if (id) {
-        seleccionarEval(id);
-      }
+      if (id) seleccionarEval(id);
     },
     [crearEvaluacion, seleccionarEval],
   );
 
   const handleDeleteEval = useCallback(
-    async (id) => {
-      await eliminarEvaluacion(id);
-    },
+    async (id) => { await eliminarEvaluacion(id); },
     [eliminarEvaluacion],
   );
 
-  // Manejadores de alumnos
   const handleAddAlumno = useCallback(
     (nombre) => {
       updateEvalData((prev) => ({
@@ -107,17 +91,12 @@ export default function App() {
     [updateEvalData],
   );
 
-  // Manejadores de criterios
   const handleAddCriterio = useCallback(() => {
     updateEvalData((prev) => ({
       ...prev,
       criterios: [
         ...prev.criterios,
-        {
-          id: localId("c"),
-          nombre: `Criterio ${prev.criterios.length + 1}`,
-          puntajeMax: 10,
-        },
+        { id: localId("c"), nombre: `Criterio ${prev.criterios.length + 1}`, puntajeMax: 10 },
       ],
     }));
   }, [updateEvalData]);
@@ -150,13 +129,11 @@ export default function App() {
     [updateEvalData],
   );
 
-  // Manejadores de importación
   const handleImportAlumnos = useCallback(
     (newAlumnos, mode) => {
       updateEvalData((prev) => ({
         ...prev,
-        alumnos:
-          mode === "replace" ? newAlumnos : [...prev.alumnos, ...newAlumnos],
+        alumnos: mode === "replace" ? newAlumnos : [...prev.alumnos, ...newAlumnos],
       }));
     },
     [updateEvalData],
@@ -166,158 +143,142 @@ export default function App() {
     (newCriterios, mode) => {
       updateEvalData((prev) => ({
         ...prev,
-        criterios:
-          mode === "replace"
-            ? newCriterios
-            : [...prev.criterios, ...newCriterios],
-        alumnos:
-          mode === "replace"
-            ? prev.alumnos.map((a) => ({ ...a, puntajes: {} }))
-            : prev.alumnos,
+        criterios: mode === "replace" ? newCriterios : [...prev.criterios, ...newCriterios],
+        alumnos: mode === "replace" ? prev.alumnos.map((a) => ({ ...a, puntajes: {} })) : prev.alumnos,
       }));
     },
     [updateEvalData],
   );
 
-  // Manejador de cambio de nombre
   const handleEvalNombreChange = useCallback(
-    (nombre) => {
-      updateEvalData((prev) => ({ ...prev, nombre }));
-    },
+    (nombre) => { updateEvalData((prev) => ({ ...prev, nombre })); },
     [updateEvalData],
   );
 
-  // ✅ Aplicación principal - SIN pantalla de carga ni login
   return (
-    <div className="min-h-screen bg-gray-50 flex">
-      {/* Sidebar */}
-      <Sidebar
-        isOpen={sidebarOpen}
-        evaluaciones={evaluaciones}
-        evalActivaId={evalActivaId}
-        onSelect={seleccionarEval}
-        onDelete={handleDeleteEval}
-        onCreate={handleCreateEval}
-        user={user}
-      />
+    <div className="min-h-screen bg-gray-50 flex flex-col">
 
-      {/* Contenido principal */}
-      <div className="flex-1 min-w-0 flex flex-col">
-        {/* Header */}
-        <Header
+      {/* Fila principal: sidebar + contenido */}
+      <div className="flex flex-1 min-h-0">
+
+        {/* Sidebar */}
+        <Sidebar
+          isOpen={sidebarOpen}
+          evaluaciones={evaluaciones}
+          evalActivaId={evalActivaId}
+          onSelect={seleccionarEval}
+          onDelete={handleDeleteEval}
+          onCreate={handleCreateEval}
           user={user}
-          saving={saving}
-          onToggleSidebar={() => setSidebarOpen((prev) => !prev)}
-          onImportAlumnos={() => setModalImportAlumnos(true)}
-          onImportRubrica={() => setModalImportRubrica(true)}
-          onLogin={handleLogin}
-          onLogout={handleLogout}
-          loginLoading={loginLoading}
-          evalNombre={evalData.nombre}
-          onEvalNombreChange={handleEvalNombreChange}
-          hasActiveEval={!!evalActivaId}
-          onCreateEval={() => handleCreateEval()}
         />
 
-        {/* Área de contenido */}
-        <main className="flex-1 p-6 overflow-auto">
-          {!evalActivaId ? (
-            /* Estado vacío - Sin evaluación seleccionada */
-            <div className="flex flex-col items-center justify-center h-full text-center space-y-4 min-h-[60vh]">
-              <div className="flex flex-col items-center text-center space-y-4">
-                {/* Icono */}
-                <div className="p-4 rounded-2xl bg-blue-50 text-blue-600">
-                  <ClipboardDocumentListIcon className="size-10" />
-                </div>
+        {/* Contenido principal */}
+        <div className="flex-1 min-w-0 flex flex-col">
 
-                {/* Texto */}
-                <div className="space-y-1">
-                  <p className="text-gray-800 font-semibold text-lg">
-                    Selecciona o crea una evaluación
-                  </p>
-                  <p className="text-sm text-gray-500 max-w-md">
-                    Cada evaluación tiene su propia rúbrica, lista de alumnos y
-                    configuración de escala personalizada.
-                  </p>
-                </div>
-              </div>
-              <button
-                onClick={() => handleCreateEval()}
-                className="bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium px-5 py-2.5 
-                  rounded-xl transition-colors cursor-pointer shadow-sm hover:shadow-md flex items-center gap-2"
-              >
-                <DocumentPlusIcon className="size-5 mx-1" />
-                Crear mi primera evaluación
-              </button>
+          {/* Header */}
+          <Header
+            user={user}
+            saving={saving}
+            onToggleSidebar={() => setSidebarOpen((prev) => !prev)}
+            onImportAlumnos={() => setModalImportAlumnos(true)}
+            onImportRubrica={() => setModalImportRubrica(true)}
+            onLogin={handleLogin}
+            onLogout={handleLogout}
+            loginLoading={loginLoading}
+            evalNombre={evalData.nombre}
+            onEvalNombreChange={handleEvalNombreChange}
+            hasActiveEval={!!evalActivaId}
+            onCreateEval={() => handleCreateEval()}
+          />
 
-              {/* Tips rápidos */}
-              <div className="mt-8 grid grid-cols-1 sm:grid-cols-2 gap-3 max-w-lg">
-                {[
-                  {
-                    icon: <AcademicCapIcon className="size-5" />,
-                    text: "Define criterios con puntajes máximos",
-                  },
-                  {
-                    icon: <UserGroupIcon className="size-5" />,
-                    text: "Agrega alumnos manualmente o por archivo",
-                  },
-                  {
-                    icon: <CalculatorIcon className="size-5" />,
-                    text: "Calcula notas con escala chilena",
-                  },
-                  {
-                    icon: <PencilSquareIcon className="size-5" />,
-                    text: "Guarda en la nube o localmente",
-                  },
-                ].map((tip, i) => (
-                  <div
-                    key={i}
-                    className="bg-white rounded-lg border border-gray-200 p-3 flex items-center gap-2"
-                  >
-                    <span className="text-lg">{tip.icon}</span>
-                    <p className="text-xs text-gray-600 text-left">
-                      {tip.text}
+          {/* Área de contenido */}
+          <main className="flex-1 p-6 overflow-auto">
+            {!evalActivaId ? (
+              <div className="flex flex-col items-center justify-center h-full text-center space-y-4 min-h-[60vh]">
+                <div className="flex flex-col items-center text-center space-y-4">
+                  <div className="p-4 rounded-2xl bg-blue-50 text-blue-600">
+                    <ClipboardDocumentListIcon className="size-10" />
+                  </div>
+                  <div className="space-y-1">
+                    <p className="text-gray-800 font-semibold text-lg">
+                      Selecciona o crea una evaluación
+                    </p>
+                    <p className="text-sm text-gray-500 max-w-md">
+                      Cada evaluación tiene su propia rúbrica, lista de alumnos y
+                      configuración de escala personalizada.
                     </p>
                   </div>
-                ))}
-              </div>
-            </div>
-          ) : (
-            /* Formulario de evaluación */
-            <EvaluationForm
-              evalData={evalData}
-              saving={saving}
-              stats={stats}
-              onUpdateEvalData={updateEvalData}
-              onAddAlumno={handleAddAlumno}
-              onDeleteAlumno={handleDeleteAlumno}
-              onUpdatePuntaje={handleUpdatePuntaje}
-              onAddCriterio={handleAddCriterio}
-              onUpdateCriterio={handleUpdateCriterio}
-              onDeleteCriterio={handleDeleteCriterio}
-            />
-          )}
-        </main>
-      </div>
+                </div>
 
-      {/* Modales de importación */}
+                <button
+                  onClick={() => handleCreateEval()}
+                  className="bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium px-5 py-2.5
+                    rounded-xl transition-colors cursor-pointer shadow-sm hover:shadow-md flex items-center gap-2"
+                >
+                  <DocumentPlusIcon className="size-5 mx-1" />
+                  Crear mi primera evaluación
+                </button>
+
+                <div className="mt-8 grid grid-cols-1 sm:grid-cols-2 gap-3 max-w-lg">
+                  {[
+                    { icon: <AcademicCapIcon className="size-5" />, text: "Define criterios con puntajes máximos" },
+                    { icon: <UserGroupIcon className="size-5" />, text: "Agrega alumnos manualmente o por archivo" },
+                    { icon: <CalculatorIcon className="size-5" />, text: "Calcula notas con escala chilena" },
+                    { icon: <PencilSquareIcon className="size-5" />, text: "Guarda en la nube o localmente" },
+                  ].map((tip, i) => (
+                    <div key={i} className="bg-white rounded-lg border border-gray-200 p-3 flex items-center gap-2">
+                      <span className="text-lg">{tip.icon}</span>
+                      <p className="text-xs text-gray-600 text-left">{tip.text}</p>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            ) : (
+              <EvaluationForm
+                evalData={evalData}
+                saving={saving}
+                stats={stats}
+                onUpdateEvalData={updateEvalData}
+                onAddAlumno={handleAddAlumno}
+                onDeleteAlumno={handleDeleteAlumno}
+                onUpdatePuntaje={handleUpdatePuntaje}
+                onAddCriterio={handleAddCriterio}
+                onUpdateCriterio={handleUpdateCriterio}
+                onDeleteCriterio={handleDeleteCriterio}
+              />
+            )}
+          </main>
+
+        </div>{/* fin contenido principal */}
+      </div>{/* fin fila principal */}
+
+      {/* Modales */}
       {modalImportAlumnos && (
         <ImportAlumnosModal
           onClose={() => setModalImportAlumnos(false)}
           onImport={handleImportAlumnos}
         />
       )}
-
       {modalImportRubrica && (
         <ImportRubricaModal
           onClose={() => setModalImportRubrica(false)}
           onImport={handleImportRubrica}
         />
       )}
-      {/* Global footer visible en toda la aplicación */}
-      <footer className="w-full text-center text-xs text-gray-400 py-2 border-t border-gray-100">
-        Desarrollado por JRTDEV
+
+      {/* Footer */}
+      <footer className="w-full text-center text-xs text-gray-400 py-2 border-t border-gray-100 bg-white shrink-0">
+        {"hecho con ♥ por "}
+        <a
+          href="https://github.com/waflex"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="text-blue-500 hover:text-blue-600 hover:underline transition-colors"
+        >
+          JRTDEV
+        </a>
       </footer>
+
     </div>
   );
 }
